@@ -1,0 +1,8 @@
+---
+  - hosts: pihole
+    become: yes
+    roles:
+      - {role: pihole}
+    tags:
+      - all
+
