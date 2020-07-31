@@ -1,9 +1,0 @@
-[ubuntu]
-adminvm.lan
-monitoring.lan
-docker1.lan
-grafana01.lan
-awx_docker.lan
-
-[all:vars]
-ansible_python_interpreter=/usr/bin/python3
