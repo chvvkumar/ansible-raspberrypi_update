@@ -1,8 +1,8 @@
 ---
-  - hosts: pihole
+  - hosts: raspberrypi
     become: yes
     roles:
-      - {role: pihole}
+      - {role: update_packages}
     tags:
       - all
 
