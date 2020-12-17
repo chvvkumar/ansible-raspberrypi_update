@@ -1,4 +1,17 @@
 ---
+  - name: Add telegraf repo keys
+    apt_key:
+      url: "https://repos.influxdata.com/influxdb.key"
+      state: present
+    become: yes
+    
+  - name: "Debian | Add Telegraf repository"
+    apt_repository:
+      repo: "deb https://repos.influxdata.com/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} stable"
+      filename: "telegraf"
+      state: present
+    become: yes
+
   - name: Update package list
     apt: update_cache=yes
     register: apt_result
@@ -27,3 +40,20 @@
     changed_when: "'packages will be REMOVED' in apt_result.stdout"      
     become: true
 
+  - name: Copy telegraf.conf
+    copy:
+      src: telegraf_pi.conf
+      dest: /etc/telegraf/telegraf.conf
+      owner: root
+      group: root
+      mode: 0644
+    notify: "Restart Telegraf"
+    become: yes
+
+  - name: Restart telegraf
+    service:
+      name: telegraf
+      state: restarted
+      enabled: yes
+    notify: "Restart Telegraf"
+    become: yes
