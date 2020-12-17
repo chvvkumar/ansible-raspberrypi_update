@@ -27,5 +27,3 @@
     changed_when: "'packages will be REMOVED' in apt_result.stdout"      
     become: true
 
-  - name: Updated PiHole
-    raw: pihole -up
