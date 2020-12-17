@@ -1,5 +1,4 @@
-[pihole]
-pi.hole
+[raspberrypi]
 camerapi.lan
 
 [all:vars]
