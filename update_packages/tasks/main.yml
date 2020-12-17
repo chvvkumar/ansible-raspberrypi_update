@@ -28,8 +28,12 @@
 
   - name: Install common packages
     apt:
-      name: ['git', 'python', 'python3', 'python-pip', 'python3-pip', 'nfs-common', 
-      'net-tools', 'htop', 'apt-transport-https', 'ca-certificates', 'software-properties-common', 'curl', 'grep', 'unzip', 'zip', 'nano', 'grep', 'tree', 'ntp', 'ntpstat', 'ntpdate']
+      name: [
+        'git', 'python', 'python3', 'python-pip', 'python3-pip', 'nfs-common', 
+        'net-tools', 'htop', 'apt-transport-https', 'ca-certificates', 
+        'software-properties-common', 'curl', 'grep', 'unzip', 'zip', 
+        'nano', 'grep', 'tree', 'ntp', 'ntpstat', 'ntpdate', 'telegraf'
+        ]
       update_cache: yes
       cache_valid_time: 86400
       state: latest
