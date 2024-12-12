@@ -8,6 +8,7 @@
 
     - name: Upgrade APT packages
       apt: upgrade=yes
+      register: apt_upgrade_result
       become: true
 
     - name: Autoremove unused packages
