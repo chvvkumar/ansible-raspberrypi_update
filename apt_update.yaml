@@ -13,5 +13,5 @@
 
     - name: Autoremove unused packages
       apt: autoremove=yes
-      changed_when: "'packages will be REMOVED' in apt_result.stdout"      
+      changed_when: "'packages will be REMOVED' in apt_upgrade_result.stdout"      
       become: true
