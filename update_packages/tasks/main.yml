@@ -1,27 +1,25 @@
 ---
-  - name: Add telegraf repo keys
-    apt_key:
-      url: "https://repos.influxdata.com/influxdb.key"
-      state: present
-    become: yes
+  # - name: Add telegraf repo keys
+  #   apt_key:
+  #     url: "https://repos.influxdata.com/influxdb.key"
+  #     state: present
+  #   become: yes
     
-  - name: "Debian | Add Telegraf repository"
-    apt_repository:
-      repo: "deb https://repos.influxdata.com/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} stable"
-      filename: "telegraf"
-      state: present
-    become: yes
+  # - name: "Debian | Add Telegraf repository"
+  #   apt_repository:
+  #     repo: "deb https://repos.influxdata.com/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} stable"
+  #     filename: "telegraf"
+  #     state: present
+  #   become: yes
 
   - name: Update package list
     apt: update_cache=yes
-    register: apt_result
     become: true
 
-  - name: Upgrade APT to the latest packages
-    apt: upgrade=dist
-    register: apt_result
+  - name: Upgrade APT packages
+    apt: upgrade=yes
     become: true
-
+    
   - name: install python 2
     raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
     become: true

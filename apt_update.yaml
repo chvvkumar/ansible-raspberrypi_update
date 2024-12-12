@@ -1,0 +1,16 @@
+---
+  - hosts: all
+    become: yes
+    tasks:
+    - name: Update package list
+      apt: update_cache=yes
+      become: true
+
+    - name: Upgrade APT packages
+      apt: upgrade=yes
+      become: true
+
+    - name: Autoremove unused packages
+      apt: autoremove=yes
+      changed_when: "'packages will be REMOVED' in apt_result.stdout"      
+      become: true
