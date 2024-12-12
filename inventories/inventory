@@ -1,6 +1,6 @@
 [all]
 rtlsdr.lan
 
-[raspberrypi]
+[rpi]
 rtlsdr.lan
 
