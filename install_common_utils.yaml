@@ -127,6 +127,13 @@
     - name: Get Telegraf status
       shell: systemctl status telegraf
       register: telegraf_status
+
     - name: Debug message after getting Telegraf status
       debug:
         msg: "Telegraf status on {{ inventory_hostname }}: {{ telegraf_status.stdout }}"
+      when: telegraf_status.rc != 0
+
+    - name: Debug message for successful Telegraf status
+      debug:
+        msg: "Telegraf is running successfully on {{ inventory_hostname }}."
+      when: telegraf_status.rc == 0
