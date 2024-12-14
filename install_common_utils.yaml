@@ -7,16 +7,7 @@
       command: hostnamectl
       register: hostnamectl_output
       become: yes
-
-    - name: Get system architecture
-      command: hostnamectl
-      register: hostnamectl_output
-      become: yes
-
-    - name: Debug architecture fact
-      debug:
-    msg: "System architecture on host: {{ inventory_hostname }} is: {{ hostnamectl_output.stdout | regex_search('Architecture:.*') }}"
-    
+   
     - name: Set architecture fact
       set_fact:
         system_architecture: >-
