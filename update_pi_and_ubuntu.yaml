@@ -1,0 +1,65 @@
+---
+  - hosts: all
+    become: yes
+    tasks:
+    - name: Update package list
+      apt: update_cache=yes
+      become: true
+
+    - name: Debug message after updating package list
+      debug:
+        msg: "Package list updated successfully."
+
+    - name: Upgrade APT packages
+      apt: upgrade=yes
+      register: apt_upgrade_result
+      become: true
+
+    - name: Debug message after upgrading packages
+      debug:
+        msg: |
+          APT packages upgraded successfully. Result:
+          Changed: {{ apt_upgrade_result.changed }}
+          Message: {{ apt_upgrade_result.msg }}
+          Stdout: |
+            {{ apt_upgrade_result.stdout }}
+          Stderr: |
+            {{ apt_upgrade_result.stderr }}
+          Failed: {{ apt_upgrade_result.failed }}
+
+    - name: Autoremove unused packages
+      apt: autoremove=yes
+      changed_when: "'packages will be REMOVED' in apt_upgrade_result.stdout"      
+      become: true
+
+    - name: Debug message after autoremove
+      debug:
+        msg: "Unused packages autoremove completed."
+
+    - name: Check if reboot is needed
+      stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+
+    - name: Debug message after checking reboot requirement
+      debug:
+        msg: "Reboot required: {{ reboot_required.stat.exists }}"
+
+    - name: Reboot if needed
+      reboot:
+        msg: "Reboot initiated by Ansible because a reboot is required"
+        connect_timeout: 5
+        reboot_timeout: 600
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+      when: reboot_required.stat.exists
+
+    - name: Wait for server to come back online
+      wait_for_connection:
+        timeout: 300
+      when: reboot_required.stat.exists
+
+    - name: Debug message after reboot
+      debug:
+        msg: "Reboot process completed and server is back online."
+      when: reboot_required.stat.exists
