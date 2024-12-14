@@ -2,13 +2,14 @@
   - hosts: all
     become: yes
     tasks:
-    - name: Update package list
-      apt:
-        update_cache: yes
-      become: true
     - name: Debug ansible_distribution for current host
       debug:
         msg: "The operating system for {{ inventory_hostname }} is {{ ansible_distribution }}."
+
+    # - name: Update package list
+    #   apt:
+    #     update_cache: yes
+    #   become: true
 
     # - name: Debug message after updating package list
     #   debug:
