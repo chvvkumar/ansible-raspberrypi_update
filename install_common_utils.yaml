@@ -1,0 +1,69 @@
+---
+  - hosts: all
+    become: yes
+    tasks:
+    - name: Update package list
+      apt: update_cache=yes
+      become: true
+
+    - name: Debug message after updating package list
+      debug:
+        msg: "Package list updated successfully on {{ inventory_hostname }}."
+
+    - name: Install common packages
+      apt:
+        name: [
+          'git', 'python', 'python3', 'python-pip', 'python3-pip', 'nfs-common', 
+          'net-tools', 'htop', 'apt-transport-https', 'ca-certificates', 
+          'software-properties-common', 'curl', 'grep', 'unzip', 'zip', 
+          'nano', 'grep', 'tree', 'ntp', 'ntpstat', 'ntpdate', 'telegraf'
+          ]
+        update_cache: yes
+        cache_valid_time: 86400
+        state: latest
+      become: true
+
+    - name: Debug message after installing common packages
+      debug:
+        msg: "Common packages installed successfully on {{ inventory_hostname }}."
+
+    - name: Copy telegraf.conf for RPis
+      copy:
+        src: config_files/telegraf/telegraf_pi.conf
+        dest: /etc/telegraf/telegraf.conf
+        owner: root
+        group: root
+        mode: 0644
+      become: yes
+      when: "'rpi' in group_names"
+
+    - name: Debug message after copying telegraf.conf for RPis
+      debug:
+        msg: "telegraf_pi.conf copied successfully on {{ inventory_hostname }}."
+      when: "'rpi' in group_names"
+
+    - name: Copy telegraf.conf for Ubuntu
+      copy:
+        src: config_files/telegraf/telegraf_ubuntu.conf
+        dest: /etc/telegraf/telegraf.conf
+        owner: root
+        group: root
+        mode: 0644
+      become: yes
+      when: "'ubuntu' in group_names"
+
+    - name: Debug message after copying telegraf.conf for Ubuntu
+      debug:
+        msg: "telegraf_ubuntu.conf copied successfully on {{ inventory_hostname }}."
+      when: "'ubuntu' in group_names"
+
+    - name: Restart Telegraf
+      service:
+        name: telegraf
+        state: restarted
+        enabled: yes
+      become: yes
+
+    - name: Debug message after restarting Telegraf
+      debug:
+        msg: "Telegraf service restarted successfully on {{ inventory_hostname }}."
