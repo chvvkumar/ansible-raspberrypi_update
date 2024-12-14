@@ -13,6 +13,10 @@
       register: hostnamectl_output
       become: yes
 
+    - name: Debug architecture fact
+      debug:
+        msg: "System architecture on host: {{ inventory_hostname }} is: {{ hostnamectl_output }} "
+
     - name: Set architecture fact
       set_fact:
         system_architecture: >-
@@ -21,7 +25,7 @@
             'arm'
           }}
 
-    - name: Debug architecture fact
+    - name: Debug set architecture fact
       debug:
         msg: "System architecture set on host: {{ inventory_hostname }} to: {{ system_architecture }} "
 
