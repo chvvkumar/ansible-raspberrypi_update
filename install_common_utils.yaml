@@ -21,7 +21,6 @@
           - ca-certificates
           - software-properties-common
           - curl
-          - grep
           - unzip
           - zip
           - nano
@@ -41,9 +40,9 @@
         msg: >
           Common packages installed successfully on {{ inventory_hostname }}. 
           Packages installed: 
-          {% for item in install_result.results %}
-            {% if item.changed %}
-              {{ item.item }}
+          {% for pkg in install_result.results %}
+            {% if pkg.changed %}
+              {{ pkg.name }}
             {% endif %}
           {% endfor %}
 
