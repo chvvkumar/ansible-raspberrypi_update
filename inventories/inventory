@@ -4,6 +4,6 @@ rtlsdr.lan
 [rpi]
 rtlsdr.lan
 
-[ubuntu]
+[Ubuntu]
 docker1.lan
 logserver.lan
