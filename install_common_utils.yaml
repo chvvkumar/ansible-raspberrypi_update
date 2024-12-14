@@ -1,38 +1,21 @@
----
-  - hosts: all
-    become: yes
-    tasks:
-    - name: Update package list
+echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
+      become: yes
+
+    - name: Update package list after adding InfluxData repository
       apt: update_cache=yes
       become: true
-
     - name: Debug message after updating package list
       debug:
         msg: "Package list updated successfully on {{ inventory_hostname }}."
 
-    - name: Install common packages
+    - name: Install Telegraf
       apt:
-        name: 
-          - git
-          - nfs-common
-          - net-tools
-          - htop
-          - apt-transport-https
-          - ca-certificates
-          - software-properties-common
-          - curl
-          - unzip
-          - zip
-          - nano
-          - grep
-          - tree
-          - ntp
-          - ntpstat
-          - ntpdate
-        update_cache: yes
-        cache_valid_time: 86400
+        name: telegraf
         state: latest
       become: true
+    - name: Debug message after installing Telegraf
+      debug:
+        msg: "Telegraf installed successfully on {{ inventory_hostname }}."
 
     - name: Copy telegraf.conf for RPis
       copy:
@@ -43,32 +26,22 @@
         mode: 0644
       become: yes
       when: "'rpi' in group_names"
-
-    - name: Add InfluxData GPG key
-      shell: |
-        curl --silent --location -O https://repos.influxdata.com/influxdata-archive.key
-        echo "943666881a1b8d9b849b74caebf02d3465d6beb716510d86a39f6c8e8dac7515  influxdata-archive.key" | sha256sum -c -
-        cat influxdata-archive.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/influxdata-archive.gpg > /dev/null
-      become: yes
-
-    - name: Add InfluxData repository
-      shell: |
-        echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
-      become: yes
-
-    - name: Update package list after adding InfluxData repository
-      apt: update_cache=yes
-      become: true
-
-    - name: Install Telegraf
-      apt:
-        name: telegraf
-        state: latest
-      become: true
-
-    - name: Debug message after installing Telegraf
+    - name: Debug message after copying telegraf.conf for RPis
       debug:
-        msg: "Telegraf installed successfully on {{ inventory_hostname }}."
+        msg: "telegraf_pi.conf copied successfully to /etc/telegraf/telegraf.conf on {{ inventory_hostname }}."
+
+    - name: Copy telegraf.conf for Ubuntu hosts
+      copy:
+        src: config_files/telegraf/telegraf_ubuntu.conf
+        dest: /etc/telegraf/telegraf.conf
+        owner: root
+        group: root
+        mode: 0644
+      become: yes
+      when: "'ubuntu' in group_names"
+    - name: Debug message after copying telegraf.conf for Ubuntu hosts
+      debug:
+        msg: "telegraf_ubuntu.conf copied successfully to /etc/telegraf/telegraf.conf on {{ inventory_hostname }}."
 
     - name: Restart Telegraf
       service:
@@ -76,24 +49,20 @@
         state: restarted
         enabled: yes
       become: yes
+    - name: Debug message after restarting Telegraf
+      debug:
+        msg: "Telegraf service restarted and enabled on {{ inventory_hostname }}."
 
     - name: Wait for 20 seconds
       wait_for:
         timeout: 20
+    - name: Debug message after waiting for 20 seconds
+      debug:
+        msg: "Waited for 20 seconds on {{ inventory_hostname }}."
 
     - name: Get Telegraf status
       shell: systemctl status telegraf
       register: telegraf_status
-      become: yes
-
-    - name: Debug message after restarting Telegraf
+    - name: Debug message after getting Telegraf status
       debug:
-        msg: >
-          Telegraf restarted successfully on {{ inventory_hostname }}.
-          {% if 'active (running)' in telegraf_status.stdout %}
-            Telegraf is running:
-            {{ telegraf_status.stdout }}
-          {% else %}
-            Telegraf encountered an error:
-            {{ telegraf_status.stderr }}
-          {% endif %}
+        msg: "Telegraf status on {{ inventory_hostname }}: {{ telegraf_status.stdout }}"
