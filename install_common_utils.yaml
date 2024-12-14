@@ -117,12 +117,12 @@
       debug:
         msg: "Telegraf service restarted and enabled on {{ inventory_hostname }}."
 
-    - name: Wait for 20 seconds
+    - name: Wait for 60 seconds
       wait_for:
-        timeout: 20
-    - name: Debug message after waiting for 20 seconds
+        timeout: 60
+    - name: Debug message after waiting for 60 seconds
       debug:
-        msg: "Waited for 20 seconds on {{ inventory_hostname }}."
+        msg: "Waited for 60 seconds on {{ inventory_hostname }}."
 
     - name: Get Telegraf status
       shell: systemctl status telegraf
