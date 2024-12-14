@@ -16,6 +16,28 @@
       debug:
         msg: "System architecture set to {{ system_architecture }} on {{ inventory_hostname }}."
 
+    - name: Copy syslog config for Graylog
+      copy:
+        src: config_files/syslog/60-graylog.conf
+        dest: /etc/rsyslog.d/60-graylog.conf
+        owner: root
+        group: root
+        mode: '0644'
+      become: yes
+    - name: Debug message after copying syslog config
+      debug:
+        msg: "Copied syslog config for Graylog to /etc/rsyslog.d/60-graylog.conf on {{ inventory_hostname }}."
+
+    - name: Restart rsyslog service
+      service:
+        name: rsyslog
+        state: restarted
+        enabled: yes
+      become: yes
+    - name: Debug message after restarting rsyslog
+      debug:
+        msg: "rsyslog service restarted and enabled on {{ inventory_hostname }}."
+
     - name: Update package list
       apt:
         update_cache: yes
