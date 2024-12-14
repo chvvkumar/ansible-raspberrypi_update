@@ -79,6 +79,14 @@
       debug:
         msg: "User {{ new_user }} created successfully on {{ inventory_hostname }}."
 
+    - name: set passwordless sudo for user
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        insertafter: '^%sudo'
+        line: 'YOUR_USERNAME ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
     - name: set time zone
       timezone:
         name: "America/Chicago"
