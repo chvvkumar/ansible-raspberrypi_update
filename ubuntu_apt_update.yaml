@@ -17,7 +17,15 @@
 
     - name: Debug message after upgrading packages
       debug:
-        msg: "APT packages upgraded successfully. Result: {{ apt_upgrade_result }}"
+        msg: |
+          APT packages upgraded successfully. Result:
+          Changed: {{ apt_upgrade_result.changed }}
+          Message: {{ apt_upgrade_result.msg }}
+          Stdout: |
+            {{ apt_upgrade_result.stdout }}
+          Stderr: |
+            {{ apt_upgrade_result.stderr }}
+          Failed: {{ apt_upgrade_result.failed }}
 
     - name: Autoremove unused packages
       apt: autoremove=yes
