@@ -22,6 +22,10 @@
             'x86'
           }}
 
+    - name: Debug architecture fact
+      debug:
+        msg: "System architecture set on host: {{ inventory_hostname }} to: {{ system_architecture }} "
+
     - name: Update package list
       apt:
         update_cache: yes
