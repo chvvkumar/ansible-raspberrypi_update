@@ -16,6 +16,40 @@
       debug:
         msg: "System architecture set to {{ system_architecture }} on {{ inventory_hostname }}."
 
+    - name: Update package list
+      apt:
+        update_cache: yes
+      become: true
+
+    - name: Debug message after updating package list
+      debug:
+        msg: "Package list updated successfully on {{ inventory_hostname }}."
+
+    - name: Install common packages
+      apt:
+        name: 
+          - rsyslog
+          - git
+          - nfs-common
+          - net-tools
+          - htop
+          - apt-transport-https
+          - ca-certificates
+          - software-properties-common
+          - curl
+          - unzip
+          - zip
+          - nano
+          - grep
+          - tree
+          - ntp
+          - ntpstat
+          - ntpdate
+        update_cache: yes
+        cache_valid_time: 86400
+        state: latest
+      become: true
+
     - name: Copy syslog config for Graylog
       copy:
         src: config_files/syslog/60-graylog.conf
@@ -37,39 +71,6 @@
     - name: Debug message after restarting rsyslog
       debug:
         msg: "rsyslog service restarted and enabled on {{ inventory_hostname }}."
-
-    - name: Update package list
-      apt:
-        update_cache: yes
-      become: true
-
-    - name: Debug message after updating package list
-      debug:
-        msg: "Package list updated successfully on {{ inventory_hostname }}."
-
-    - name: Install common packages
-      apt:
-        name: 
-          - git
-          - nfs-common
-          - net-tools
-          - htop
-          - apt-transport-https
-          - ca-certificates
-          - software-properties-common
-          - curl
-          - unzip
-          - zip
-          - nano
-          - grep
-          - tree
-          - ntp
-          - ntpstat
-          - ntpdate
-        update_cache: yes
-        cache_valid_time: 86400
-        state: latest
-      become: true
 
     - name: Add InfluxData GPG key
       shell: |
