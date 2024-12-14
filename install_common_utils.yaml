@@ -15,8 +15,8 @@
 
     - name: Debug architecture fact
       debug:
-        msg: "System architecture on host: {{ inventory_hostname }} is: {{ hostnamectl_output }} "
-
+    msg: "System architecture on host: {{ inventory_hostname }} is: {{ hostnamectl_output.stdout | regex_search('Architecture:.*') }}"
+    
     - name: Set architecture fact
       set_fact:
         system_architecture: >-
@@ -30,147 +30,149 @@
         msg: "System architecture set on host: {{ inventory_hostname }} to: {{ system_architecture }} "
 
 #--------------------------------------------------------------
-    # - name: Update package list
-    #   apt:
-    #     update_cache: yes
-    #   become: true
+# Main Section
+#--------------------------------------------------------------
+    - name: Update package list
+      apt:
+        update_cache: yes
+      become: true
 
-    # - name: Debug message after updating package list
-    #   debug:
-    #     msg: "Package list updated successfully on {{ inventory_hostname }}."
+    - name: Debug message after updating package list
+      debug:
+        msg: "Package list updated successfully on {{ inventory_hostname }}."
 
-    # - name: Install common packages
-    #   apt:
-    #     name: 
-    #       - rsyslog
-    #       - git
-    #       - nfs-common
-    #       - net-tools
-    #       - htop
-    #       - apt-transport-https
-    #       - ca-certificates
-    #       - software-properties-common
-    #       - curl
-    #       - unzip
-    #       - zip
-    #       - nano
-    #       - grep
-    #       - tree
-    #       - ntp
-    #       - ntpstat
-    #       - ntpdate
-    #     update_cache: yes
-    #     cache_valid_time: 86400
-    #     state: latest
-    #   become: true
+    - name: Install common packages
+      apt:
+        name: 
+          - rsyslog
+          - git
+          - nfs-common
+          - net-tools
+          - htop
+          - apt-transport-https
+          - ca-certificates
+          - software-properties-common
+          - curl
+          - unzip
+          - zip
+          - nano
+          - grep
+          - tree
+          - ntp
+          - ntpstat
+          - ntpdate
+        update_cache: yes
+        cache_valid_time: 86400
+        state: latest
+      become: true
 
-    # - name: Copy syslog config for Graylog
-    #   copy:
-    #     src: config_files/syslog/60-graylog.conf
-    #     dest: /etc/rsyslog.d/60-graylog.conf
-    #     owner: root
-    #     group: root
-    #     mode: '0644'
-    #   become: yes
-    # - name: Debug message after copying syslog config
-    #   debug:
-    #     msg: "Copied syslog config for Graylog to /etc/rsyslog.d/60-graylog.conf on {{ inventory_hostname }}."
+    - name: Copy syslog config for Graylog
+      copy:
+        src: config_files/syslog/60-graylog.conf
+        dest: /etc/rsyslog.d/60-graylog.conf
+        owner: root
+        group: root
+        mode: '0644'
+      become: yes
+    - name: Debug message after copying syslog config
+      debug:
+        msg: "Copied syslog config for Graylog to /etc/rsyslog.d/60-graylog.conf on {{ inventory_hostname }}."
 
-    # - name: Restart rsyslog service
-    #   service:
-    #     name: rsyslog
-    #     state: restarted
-    #     enabled: yes
-    #   become: yes
-    # - name: Debug message after restarting rsyslog
-    #   debug:
-    #     msg: "rsyslog service restarted and enabled on {{ inventory_hostname }}."
+    - name: Restart rsyslog service
+      service:
+        name: rsyslog
+        state: restarted
+        enabled: yes
+      become: yes
+    - name: Debug message after restarting rsyslog
+      debug:
+        msg: "rsyslog service restarted and enabled on {{ inventory_hostname }}."
 
-    # - name: Add InfluxData GPG key
-    #   shell: |
-    #     curl --silent --location -O https://repos.influxdata.com/influxdata-archive.key
-    #     echo "943666881a1b8d9b849b74caebf02d3465d6beb716510d86a39f6c8e8dac7515  influxdata-archive.key" | sha256sum -c -
-    #     cat influxdata-archive.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/influxdata-archive.gpg > /dev/null
-    #   become: yes
+    - name: Add InfluxData GPG key
+      shell: |
+        curl --silent --location -O https://repos.influxdata.com/influxdata-archive.key
+        echo "943666881a1b8d9b849b74caebf02d3465d6beb716510d86a39f6c8e8dac7515  influxdata-archive.key" | sha256sum -c -
+        cat influxdata-archive.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/influxdata-archive.gpg > /dev/null
+      become: yes
 
-    # - name: Add InfluxData repository
-    #   shell: |
-    #     echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
-    #   become: yes
+    - name: Add InfluxData repository
+      shell: |
+        echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
+      become: yes
 
-    # - name: Update package list after adding InfluxData repository
-    #   apt: update_cache=yes
-    #   become: true
-    # - name: Debug message after updating package list
-    #   debug:
-    #     msg: "Package list updated successfully on {{ inventory_hostname }}."
+    - name: Update package list after adding InfluxData repository
+      apt: update_cache=yes
+      become: true
+    - name: Debug message after updating package list
+      debug:
+        msg: "Package list updated successfully on {{ inventory_hostname }}."
 
-    # - name: Install Telegraf
-    #   apt:
-    #     name: telegraf
-    #     state: latest
-    #   become: true
-    # - name: Debug message after installing Telegraf
-    #   debug:
-    #     msg: "Telegraf installed successfully on {{ inventory_hostname }}."
+    - name: Install Telegraf
+      apt:
+        name: telegraf
+        state: latest
+      become: true
+    - name: Debug message after installing Telegraf
+      debug:
+        msg: "Telegraf installed successfully on {{ inventory_hostname }}."
 
-    # - name: Copy telegraf.conf for Pi
-    #   copy:
-    #     src: config_files/telegraf/telegraf_pi.conf
-    #     dest: /etc/telegraf/telegraf.conf
-    #     owner: root
-    #     group: root
-    #     mode: 0644
-    #   become: yes
-    #   when: system_architecture == 'arm'
+    - name: Copy telegraf.conf for Pi
+      copy:
+        src: config_files/telegraf/telegraf_pi.conf
+        dest: /etc/telegraf/telegraf.conf
+        owner: root
+        group: root
+        mode: 0644
+      become: yes
+      when: system_architecture == 'arm'
 
-    # - name: Debug message after copying telegraf.conf for Pi
-    #   debug:
-    #     msg: "telegraf_pi.conf copied successfully to /etc/telegraf/telegraf.conf on {{ inventory_hostname }}."
-    #   when: system_architecture == 'arm'
+    - name: Debug message after copying telegraf.conf for Pi
+      debug:
+        msg: "telegraf_pi.conf copied successfully to /etc/telegraf/telegraf.conf on {{ inventory_hostname }}."
+      when: system_architecture == 'arm'
 
-    # - name: Copy telegraf.conf for x86
-    #   copy:
-    #     src: config_files/telegraf/telegraf_ubuntu.conf
-    #     dest: /etc/telegraf/telegraf.conf
-    #     owner: root
-    #     group: root
-    #     mode: 0644
-    #   become: yes
-    #   when: system_architecture == 'x86'
+    - name: Copy telegraf.conf for x86
+      copy:
+        src: config_files/telegraf/telegraf_ubuntu.conf
+        dest: /etc/telegraf/telegraf.conf
+        owner: root
+        group: root
+        mode: 0644
+      become: yes
+      when: system_architecture == 'x86'
 
-    # - name: Debug message after copying telegraf.conf for x86
-    #   debug:
-    #     msg: "telegraf_ubuntu.conf copied successfully to /etc/telegraf/telegraf.conf on {{ inventory_hostname }}."
-    #   when: system_architecture == 'x86'
+    - name: Debug message after copying telegraf.conf for x86
+      debug:
+        msg: "telegraf_ubuntu.conf copied successfully to /etc/telegraf/telegraf.conf on {{ inventory_hostname }}."
+      when: system_architecture == 'x86'
       
-    # - name: Restart Telegraf
-    #   service:
-    #     name: telegraf
-    #     state: restarted
-    #     enabled: yes
-    #   become: yes
-    # - name: Debug message after restarting Telegraf
-    #   debug:
-    #     msg: "Telegraf service restarted and enabled on {{ inventory_hostname }}."
+    - name: Restart Telegraf
+      service:
+        name: telegraf
+        state: restarted
+        enabled: yes
+      become: yes
+    - name: Debug message after restarting Telegraf
+      debug:
+        msg: "Telegraf service restarted and enabled on {{ inventory_hostname }}."
 
-    # - name: Wait for 60 seconds
-    #   wait_for:
-    #     timeout: 60
-    # - name: Debug message after waiting for 60 seconds
-    #   debug:
-    #     msg: "Waited for 60 seconds on {{ inventory_hostname }}."
+    - name: Wait for 60 seconds
+      wait_for:
+        timeout: 60
+    - name: Debug message after waiting for 60 seconds
+      debug:
+        msg: "Waited for 60 seconds on {{ inventory_hostname }}."
 
-    # - name: Get Telegraf status
-    #   shell: systemctl status telegraf
-    #   register: telegraf_status
+    - name: Get Telegraf status
+      shell: systemctl status telegraf
+      register: telegraf_status
 
-    # - name: Debug message after getting Telegraf status
-    #   debug:
-    #     msg: "Telegraf status on {{ inventory_hostname }}: {{ telegraf_status.stdout }}"
-    #   when: telegraf_status.rc != 0
+    - name: Debug message after getting Telegraf status
+      debug:
+        msg: "Telegraf status on {{ inventory_hostname }}: {{ telegraf_status.stdout }}"
+      when: telegraf_status.rc != 0
 
-    # - name: Debug message for successful Telegraf status
-    #   debug:
-    #     msg: "Telegraf is running successfully on {{ inventory_hostname }}."
-    #   when: telegraf_status.rc == 0
+    - name: Debug message for successful Telegraf status
+      debug:
+        msg: "Telegraf is running successfully on {{ inventory_hostname }}."
+      when: telegraf_status.rc == 0
