@@ -1,5 +1,5 @@
 ---
-  - hosts: rpi
+  - hosts: Ubuntu
     become: yes
     tasks:
     - name: Update package list
