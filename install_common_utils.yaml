@@ -8,13 +8,19 @@
       register: hostnamectl_output
       become: yes
 
+    - name: Get system architecture
+      command: hostnamectl
+      register: hostnamectl_output
+      become: yes
+
     - name: Set architecture fact
       set_fact:
-        system_architecture: "{{ 'arm64' if 'Architecture: arm64' in hostnamectl_output.stdout else 'x86-64' }}"
-
-    - name: Debug message after setting architecture fact
-      debug:
-        msg: "System architecture set to {{ system_architecture }} on {{ inventory_hostname }}."
+        system_architecture: >-
+          {{
+            'arm' if 'Architecture: arm64' in hostnamectl_output.stdout or
+            'Architecture: arm' in hostnamectl_output.stdout else
+            'x86'
+          }}
 
     - name: Update package list
       apt:
@@ -100,7 +106,7 @@
       debug:
         msg: "Telegraf installed successfully on {{ inventory_hostname }}."
 
-    - name: Copy telegraf.conf for arm64 architecture
+    - name: Copy telegraf.conf for Pi
       copy:
         src: config_files/telegraf/telegraf_pi.conf
         dest: /etc/telegraf/telegraf.conf
@@ -108,14 +114,14 @@
         group: root
         mode: 0644
       become: yes
-      when: system_architecture == 'arm64'
+      when: system_architecture == 'arm'
 
-    - name: Debug message after copying telegraf.conf for arm64 architecture
+    - name: Debug message after copying telegraf.conf for Pi
       debug:
         msg: "telegraf_pi.conf copied successfully to /etc/telegraf/telegraf.conf on {{ inventory_hostname }}."
-      when: system_architecture == 'arm64'
+      when: system_architecture == 'arm'
 
-    - name: Copy telegraf.conf for x86-64 architecture
+    - name: Copy telegraf.conf for x86
       copy:
         src: config_files/telegraf/telegraf_ubuntu.conf
         dest: /etc/telegraf/telegraf.conf
@@ -123,12 +129,12 @@
         group: root
         mode: 0644
       become: yes
-      when: system_architecture == 'x86-64'
+      when: system_architecture == 'x86'
 
-    - name: Debug message after copying telegraf.conf for x86-64 architecture
+    - name: Debug message after copying telegraf.conf for x86
       debug:
         msg: "telegraf_ubuntu.conf copied successfully to /etc/telegraf/telegraf.conf on {{ inventory_hostname }}."
-      when: system_architecture == 'x86-64'
+      when: system_architecture == 'x86'
       
     - name: Restart Telegraf
       service:
