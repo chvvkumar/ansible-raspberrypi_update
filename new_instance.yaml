@@ -23,8 +23,67 @@
         msg: "System architecture set on host: {{ inventory_hostname }} to: {{ system_architecture }} "
 
 #--------------------------------------------------------------
-# Main Section
+# Pre Reboot Tasks
 #--------------------------------------------------------------
+
+    - name: set hostname
+      hostname:
+        name: "{{ new_hostname }}"
+      become: yes
+
+    - name: Debug message after setting hostname
+      debug:
+        msg: "Hostname set to {{ new_hostname }} on {{ inventory_hostname }}."
+
+    - name: Add host to group 'just_created' 
+      ansible.builtin.add_host:
+        name: '{{ new_hostname }}'
+        groups: just_created
+
+    - name: Debug message after adding host to group 'just_created'
+      debug:
+        msg: "Host {{ new_hostname }} added to group 'just_created' on {{ inventory_hostname }}."
+
+    - name: reboot
+      command: shutdown -r now
+      async: 1
+      poll: 0
+      become: yes
+
+    - name: Debug message after rebooting
+      debug:
+        msg: "Rebooting {{ inventory_hostname }}."
+
+#--------------------------------------------------------------
+# Post Reboot Tasks
+#--------------------------------------------------------------
+  - hosts: just_created
+    become: yes
+    tasks:
+
+    - name: check connection
+      wait_for_connection:
+        timeout: 120
+        sleep: 5
+
+    - name: create user
+      user:
+        name: "{{ new_user }}"
+        password: "{{ new_user_password }}"
+        shell: /bin/bash
+        groups: sudo
+        append: yes
+      become: yes
+
+    - name: Debug message after creating user
+      debug:
+        msg: "User {{ new_user }} created successfully on {{ inventory_hostname }}."
+
+    - name: set time zone
+      timezone:
+        name: "America/Chicago"
+      become: yes
+
     - name: Update package list
       apt:
         update_cache: yes

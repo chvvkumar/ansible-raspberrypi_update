@@ -1,8 +1,0 @@
----
-  - hosts: raspberrypi
-    become: yes
-    roles:
-      - {role: update_packages}
-    tags:
-      - all
-
