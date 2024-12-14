@@ -12,12 +12,25 @@
 
     - name: Install common packages
       apt:
-        name: [
-          'git', 'python', 'python3', 'python-pip', 'python3-pip', 'nfs-common', 
-          'net-tools', 'htop', 'apt-transport-https', 'ca-certificates', 
-          'software-properties-common', 'curl', 'grep', 'unzip', 'zip', 
-          'nano', 'grep', 'tree', 'ntp', 'ntpstat', 'ntpdate', 'telegraf'
-          ]
+        name: 
+          - git
+          - nfs-common
+          - net-tools
+          - htop
+          - apt-transport-https
+          - ca-certificates
+          - software-properties-common
+          - curl
+          - grep
+          - unzip
+          - zip
+          - nano
+          - grep
+          - tree
+          - ntp
+          - ntpstat
+          - ntpdate
+          - telegraf
         update_cache: yes
         cache_valid_time: 86400
         state: latest
@@ -25,7 +38,14 @@
 
     - name: Debug message after installing common packages
       debug:
-        msg: "Common packages installed successfully on {{ inventory_hostname }}."
+        msg: >
+          Common packages installed successfully on {{ inventory_hostname }}. 
+          Packages installed: 
+          {% for item in install_result.results %}
+            {% if item.changed %}
+              {{ item.item }}
+            {% endif %}
+          {% endfor %}
 
     - name: Copy telegraf.conf for RPis
       copy:
@@ -64,6 +84,23 @@
         enabled: yes
       become: yes
 
+    - name: Wait for 20 seconds
+      wait_for:
+        timeout: 20
+
+    - name: Get Telegraf status
+      shell: systemctl status telegraf
+      register: telegraf_status
+      become: yes
+
     - name: Debug message after restarting Telegraf
       debug:
-        msg: "Telegraf service restarted successfully on {{ inventory_hostname }}."
+        msg: >
+          Telegraf restarted successfully on {{ inventory_hostname }}.
+          {% if 'active (running)' in telegraf_status.stdout %}
+            Telegraf is running:
+            {{ telegraf_status.stdout }}
+          {% else %}
+            Telegraf encountered an error:
+            {{ telegraf_status.stderr }}
+          {% endif %}
