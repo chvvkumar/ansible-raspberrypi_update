@@ -17,9 +17,8 @@
       set_fact:
         system_architecture: >-
           {{
-            'arm' if 'Architecture: arm64' in hostnamectl_output.stdout or
-            'Architecture: arm' in hostnamectl_output.stdout else
-            'x86'
+            'x86' if 'Architecture: x86-64' in hostnamectl_output.stdout else
+            'arm'
           }}
 
     - name: Debug architecture fact
