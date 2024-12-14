@@ -1,4 +1,50 @@
-echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
+---
+  - hosts: all
+    become: yes
+    tasks:
+    - name: Update package list
+      apt:
+        update_cache: yes
+      become: true
+
+    - name: Debug message after updating package list
+      debug:
+        msg: "Package list updated successfully on {{ inventory_hostname }}."
+
+    - name: Install common packages
+      apt:
+        name: 
+          - git
+          - nfs-common
+          - net-tools
+          - htop
+          - apt-transport-https
+          - ca-certificates
+          - software-properties-common
+          - curl
+          - unzip
+          - zip
+          - nano
+          - grep
+          - tree
+          - ntp
+          - ntpstat
+          - ntpdate
+        update_cache: yes
+        cache_valid_time: 86400
+        state: latest
+      become: true
+
+    - name: Add InfluxData GPG key
+      shell: |
+        curl --silent --location -O https://repos.influxdata.com/influxdata-archive.key
+        echo "943666881a1b8d9b849b74caebf02d3465d6beb716510d86a39f6c8e8dac7515  influxdata-archive.key" | sha256sum -c -
+        cat influxdata-archive.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/influxdata-archive.gpg > /dev/null
+      become: yes
+
+    - name: Add InfluxData repository
+      shell: |
+        echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
       become: yes
 
     - name: Update package list after adding InfluxData repository
