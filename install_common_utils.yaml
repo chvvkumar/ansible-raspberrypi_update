@@ -30,7 +30,6 @@
           - ntp
           - ntpstat
           - ntpdate
-          - telegraf
         update_cache: yes
         cache_valid_time: 86400
         state: latest
@@ -57,25 +56,31 @@
       become: yes
       when: "'rpi' in group_names"
 
-    - name: Debug message after copying telegraf.conf for RPis
-      debug:
-        msg: "telegraf_pi.conf copied successfully on {{ inventory_hostname }}."
-      when: "'rpi' in group_names"
-
-    - name: Copy telegraf.conf for Ubuntu
-      copy:
-        src: config_files/telegraf/telegraf_ubuntu.conf
-        dest: /etc/telegraf/telegraf.conf
-        owner: root
-        group: root
-        mode: 0644
+    - name: Add InfluxData GPG key
+      shell: |
+        curl --silent --location -O https://repos.influxdata.com/influxdata-archive.key
+        echo "943666881a1b8d9b849b74caebf02d3465d6beb716510d86a39f6c8e8dac7515  influxdata-archive.key" | sha256sum -c -
+        cat influxdata-archive.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/influxdata-archive.gpg > /dev/null
       become: yes
-      when: "'ubuntu' in group_names"
 
-    - name: Debug message after copying telegraf.conf for Ubuntu
+    - name: Add InfluxData repository
+      shell: |
+        echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
+      become: yes
+
+    - name: Update package list after adding InfluxData repository
+      apt: update_cache=yes
+      become: true
+
+    - name: Install Telegraf
+      apt:
+        name: telegraf
+        state: latest
+      become: true
+
+    - name: Debug message after installing Telegraf
       debug:
-        msg: "telegraf_ubuntu.conf copied successfully on {{ inventory_hostname }}."
-      when: "'ubuntu' in group_names"
+        msg: "Telegraf installed successfully on {{ inventory_hostname }}."
 
     - name: Restart Telegraf
       service:
