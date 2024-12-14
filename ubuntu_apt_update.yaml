@@ -46,7 +46,12 @@
         post_reboot_delay: 30
       when: reboot_required.stat.exists
 
+    - name: Wait for server to come back online
+      wait_for_connection:
+        timeout: 300
+      when: reboot_required.stat.exists
+
     - name: Debug message after reboot
       debug:
-        msg: "Reboot process completed."
+        msg: "Reboot process completed and server is back online."
       when: reboot_required.stat.exists
