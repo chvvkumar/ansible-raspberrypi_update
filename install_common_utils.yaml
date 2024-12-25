@@ -54,6 +54,7 @@
           - ntp
           - ntpstat
           - ntpdate
+          - wavemon
         update_cache: yes
         cache_valid_time: 86400
         state: latest
